@@ -1,0 +1,9 @@
+# ci
+
+A minimal ci-tool. 
+Create a folder, called pipeline and put your scripts in in. 
+Every script is prefixed with a number. 
+If two scripts have the same numer they are executed in parallel.
+A lower script with a lower prefix is always excectued before one with a higher one.
+
+Simpli run ci in your project and get a report in the file pipeline.adoc
