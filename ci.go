@@ -6,9 +6,12 @@ import (
 	"io/ioutil"
 	"log"
 	"os/exec"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"os"
 )
 
 // git rev-parse HEAD
@@ -46,24 +49,45 @@ func getName() string {
 }
 
 func main() {
-  name := getName()
-  fmt.Println(name)
+  name := "pipeline.adoc" // getName()
   pipeline := "./pipeline/"
   files, err := filesInFolder(pipeline)
   if err != nil {
     log.Fatal(err)
   }
-  fmt.Println(files)
+  report := "# ci\n:toc:\n\n"
+  globalOk := true
   for _, file := range files {
-    log.Printf("running %s", file)
     stdout, stderr, err := run(pipeline + file)
+    ok := (err == nil)
+    globalOk = globalOk && ok
+    report += "## " + file
+    if !ok {
+      report += " FAILED"
+    }
+    report += "\n"
+
+    stdout = strings.TrimSpace(stdout)
+    stderr = strings.TrimSpace(stderr)
+    if stdout != "" {
+      report += "\n[source]\n----\n"
+      report += stdout
+      report += "\n----\n\n"
+    }
+    if stderr != "" {
+      report += "\n[source]\n----\n"
+      report += stderr
+      report += "\n----\n\n"
+    }
+    err = WriteFile(name, report)
     if err != nil {
-      log.Printf("got error: %v", err)
-      log.Println(stdout)
-      log.Println(stderr)
+      log.Fatal(err)
     }
   }
-
+  
+  if !globalOk {
+    log.Fatalf("Pipeline failed")
+  }
 }
 
 func filesInFolder(path string) ([]string, error) {
@@ -79,7 +103,12 @@ func filesInFolder(path string) ([]string, error) {
     }
   }
 
+  sort.Strings(res)
   return res, nil
+}
+
+func WriteFile(path, content string) error {
+  return os.WriteFile(path, []byte(content), 0644)
 }
 
 func Lookup() {
@@ -109,5 +138,5 @@ func Lookup() {
     }
   }
   dt := time.Now()
-  fmt.Println(dt.Format("2006-02-01_15:04:05"))
+  fmt.Println(dt.Format("2006-01-02_15:04:05"))
 }

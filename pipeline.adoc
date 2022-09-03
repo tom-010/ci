@@ -1,0 +1,32 @@
+# ci
+:toc:
+
+## 01_abc.sh
+
+[source]
+----
+some output
+another line
+----
+
+
+[source]
+----
+this goes to stderr
+another error
+----
+
+## 01_b.sh
+
+[source]
+----
+ok
+----
+
+## 02_test.sh
+
+[source]
+----
+ok
+----
+
