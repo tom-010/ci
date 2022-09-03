@@ -19,7 +19,6 @@ func gitHash() string {
     fmt.Println(err)
     return ""
   }
-  
   return stdout 
 }
 
@@ -47,13 +46,50 @@ func getName() string {
 }
 
 func main() {
-  fmt.Println(getName())
+  name := getName()
+  fmt.Println(name)
+  pipeline := "./pipeline/"
+  files, err := filesInFolder(pipeline)
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Println(files)
+  for _, file := range files {
+    log.Printf("running %s", file)
+    stdout, stderr, err := run(pipeline + file)
+    if err != nil {
+      log.Printf("got error: %v", err)
+      log.Println(stdout)
+      log.Println(stderr)
+    }
+  }
+
+}
+
+func filesInFolder(path string) ([]string, error) {
+  res := []string{}
+  files, err := ioutil.ReadDir(path)
+  if err != nil {
+    return res, err
+  }
+
+  for _, file := range files {
+    if !file.IsDir() {
+      res = append(res, file.Name())
+    }
+  }
+
+  return res, nil
+}
+
+func Lookup() {
   stdout, stderr, err := run("./pipeline/01_abc.sh")
   if err != nil {
     log.Fatal(err)
   }
   fmt.Printf("out: %s\nerr: %s\n", stdout, stderr)
 
+  fmt.Print()
 
   fmt.Println("ci")
   files, err := ioutil.ReadDir("./pipeline/")
